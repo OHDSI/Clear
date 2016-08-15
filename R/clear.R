@@ -34,6 +34,15 @@ queryTest<-function(connectionDetails){
   data
 }
 
+#' Generate Clear dataset
+#' 
+#' @details
+#' initial testing
+#' 
+#' @return
+#' nothing
+#' 
+#' @export
 generateClearDataSet<-function(connectionDetails, drug_list=NA, labtest_list=NA
                                , date_from='2001-01-01', date_to='2010-03-31'){
   conn<-DatabaseConnector::connect(connectionDetails)
@@ -57,6 +66,15 @@ generateClearDataSet<-function(connectionDetails, drug_list=NA, labtest_list=NA
   dbDisconnect(conn)
 }
 
+#' Get Clear result dataset
+#' 
+#' @details
+#' initial testing
+#' 
+#' @return
+#' a data frame from summary table
+#' 
+#' @export
 getClearResultDataSet<-function(connectionDetails){
   conn<-DatabaseConnector::connect(connectionDetails)
   
@@ -70,17 +88,41 @@ getClearResultDataSet<-function(connectionDetails){
   data
 }
 
+#' Create data frame for set a target drug
+#' 
+#' @details
+#' initial testing
+#' 
+#' @return
+#' nothing
+#' 
 #' @export
 createTargetDrugDataFrame<-function(name,class,code){
   df<-data.frame(DRUG_NAME=c(name),DRUG_CLASS=c(class),DRUG_CODE=c(code))
 }
 
+#' Add into TargetDrugDataFrame
+#' 
+#' @details
+#' initial testing
+#' 
+#' @return
+#' nothing
+#' 
 #' @export
 addTargetDrugDataFrame<-function(origin,name,class,code){
   df<-data.frame(DRUG_NAME=c(name),DRUG_CLASS=c(class),DRUG_CODE=c(code))
   rbind(origin,df)
 }
 
+#' Create data frame for set a target labtest
+#' 
+#' @details
+#' initial testing
+#' 
+#' @return
+#' nothing
+#' 
 #' @export
 createLabtestDataFrame<-function(id,name,type){
   df<-data.frame(LAB_ID=c(id),LAB_NAME=c(name),ABNORM_TYPE=c(type))
