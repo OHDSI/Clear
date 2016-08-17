@@ -54,7 +54,7 @@ generateClearDataSet<-function(connectionDetails, drug_list=NA, labtest_list=NA
     DatabaseConnector::insertTable(conn, "LABTEST_LIST", labtest_list)
   }
   
-  renderedSql<-SqlRender::loadRenderTranslateSql("CLEAR_0.1_CDMv4_Formatted.sql",
+  renderedSql<-SqlRender::loadRenderTranslateSql("CLEAR_0.2_CDMv4_Formatted.sql",
                                                  packageName="Clear",
                                                  dbms=connectionDetails$dbms,
                                                  target_database=connectionDetails$target_database,
@@ -78,14 +78,53 @@ generateClearDataSet<-function(connectionDetails, drug_list=NA, labtest_list=NA
 getClearResultDataSet<-function(connectionDetails){
   conn<-DatabaseConnector::connect(connectionDetails)
   
-  renderedSql<-SqlRender::loadRenderTranslateSql("CLEAR_0.1_CDMv4_Summary_Formatted.sql",
-                                                 packageName="Cert",
+  renderedSql<-SqlRender::loadRenderTranslateSql("CLEAR_0.2_CDMv4_Summary_Formatted.sql",
+                                                 packageName="Clear",
                                                  dbms=connectionDetails$dbms,
                                                  target_database=connectionDetails$target_database,
                                                  cdm_database=connectionDetails$cdm_database)
   data<-DatabaseConnector::querySql(conn, renderedSql)
   dbDisconnect(conn)
   data
+}
+
+#' Get Clear result dataset for matching
+#' 
+#' @details
+#' initial testing
+#' 
+#' @return
+#' a data frame from summary table for matching
+#' 
+#' @export
+getDataForMatching<-function(connectionDetails){
+  conn<-DatabaseConnector::connect(connectionDetails)
+  
+  renderedSql<-SqlRender::loadRenderTranslateSql("CLEAR_0.2_CDMv4_Match_Formatted.sql",
+                                                 packageName="Clear",
+                                                 dbms=connectionDetails$dbms,
+                                                 target_database=connectionDetails$target_database,
+                                                 cdm_database=connectionDetails$cdm_database)
+  data<-DatabaseConnector::querySql(conn, renderedSql)
+  dbDisconnect(conn)
+  data
+}
+
+#' Run exact 1:4 matching
+#' 
+#' @details
+#' initial testing
+#' 
+#' @return
+#' a matched data frame
+#' 
+#' @export
+runMatching<-function(connectionDetails){
+  match<-getDataForMatching(connectionDetails)
+  
+  plyr::ddply(match, .(DRUG_NAME,LAB_NAME,RESULT_TYPE), function(x){
+    broom::tidy(mcnemar.test(x$JUDGE_BEFORE,x$JUDGE_AFTER))
+  })
 }
 
 #' Create data frame for set a target drug
