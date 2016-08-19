@@ -6,7 +6,9 @@ Description: What the package does (one paragraph).
 Depends:
     R (>= 3.3.1),
     plyr,
-    broom
+    broom,
+	MatchIt,
+	survival
 License: What license is it under?
 Encoding: UTF-8
 LazyData: true

@@ -44,4 +44,10 @@ generateClearDataSet(connectionDetails, drug_list=targetdrug, labtest_list=labte
 
 summary<-getClearResultDataSet(connectionDetails)
 head(summary)
+
+matched<-runMatching(connectionDetails)
+head(matched)
+
+clogit<-runCLogit(matched)
+head(clogit)
 ```

@@ -122,8 +122,60 @@ getDataForMatching<-function(connectionDetails){
 runMatching<-function(connectionDetails){
   match<-getDataForMatching(connectionDetails)
   
-  plyr::ddply(match, .(DRUG_NAME,LAB_NAME,RESULT_TYPE), function(x){
-    broom::tidy(mcnemar.test(x$JUDGE_BEFORE,x$JUDGE_AFTER))
+  match[is.na(match)]<-"NA"
+  matched.data<-plyr::ddply(match[!(match$DRUG_NAME%in%("NA")),], .(DRUG_NAME), function(x){
+    x<-rbind(x,match[match$DRUG_NAME%in%("NA"),])
+
+    plyr::ddply(x, .(LAB_NAME,RESULT_TYPE), function(x){
+      matched<-MatchIt::matchit(!(DRUG_NAME%in%c("NA")) ~ as.numeric(AGE) + as.factor(SEX)
+                                , distance="logit", method="nearest", caliper=0.1, ratio=4
+                                , data=x)
+      cbind(IDX_DRUG=x[!(x$DRUG_NAME%in%c("NA")),c("DRUG_NAME")][1]
+            , match.data(matched))
+    })
+  })
+}
+
+#' Run exact 1:4 matching with data
+#' 
+#' @details
+#' initial testing
+#' 
+#' @return
+#' a matched data frame
+#' 
+#' @export
+runMatchingWithData<-function(match){
+  match[is.na(match)]<-"NA"
+  matched.data<-plyr::ddply(match[!(match$DRUG_NAME%in%("NA")),], .(DRUG_NAME), function(x){
+    x<-rbind(x,match[match$DRUG_NAME%in%("NA"),])
+    
+    plyr::ddply(x, .(LAB_NAME,RESULT_TYPE), function(x){
+      matched<-MatchIt::matchit(!(DRUG_NAME%in%c("NA")) ~ as.numeric(AGE) + as.factor(SEX)
+                                , distance="logit", method="nearest", caliper=0.1, ratio=4
+                                , data=x)
+      cbind(IDX_DRUG=x[!(x$DRUG_NAME%in%c("NA")),c("DRUG_NAME")][1]
+            , match.data(matched))
+    })
+  })
+}
+
+#' Run Conditional Logistic regression
+#' 
+#' @details
+#' initial testing
+#' 
+#' @return
+#' a outcome of regression
+#' 
+#' @export
+runCLogit<-function(matched.data){
+  plyr::ddply(matched.data, .(IDX_DRUG), function(x){
+    x$DRUG_NAME<-factor(x$DRUG_NAME)
+    x$DRUG_NAME<-relevel(x$DRUG_NAME, "NA")
+    plyr::ddply(x, .(LAB_NAME,RESULT_TYPE), function(x){
+      broom::tidy(clog<-survival::clogit(JUDGE%in%c("NORMAL")~DRUG_NAME+strata(distance), data=x))
+    })
   })
 }
 
