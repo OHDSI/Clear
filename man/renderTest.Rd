@@ -10,9 +10,6 @@ renderTest()
 a query form string
 }
 \description{
-Test rendering query
-}
-\details{
-for testing
+Test rendering functionality
 }
 
